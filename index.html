@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Hampiran Selisih Mundur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .calculator-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 1rem;
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        input[type="number"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .method-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .method-option {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .method-option input[type="radio"] {
+            display: none;
+        }
+
+        .method-option label {
+            display: block;
+            padding: 12px;
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .method-option input[type="radio"]:checked + label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .result {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .result h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .result-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .formula {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            margin-top: 15px;
+            overflow-x: auto;
+        }
+
+        .info-box {
+            background: rgba(102, 126, 234, 0.1);
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .example {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+        }
+
+        .example strong {
+            color: #856404;
+        }
+
+        #orderGroup {
+            display: block;
+            transition: all 0.3s ease;
+        }
+            .calculator-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            .method-selector {
+                flex-direction: column;
+            }
+            
+            .method-option {
+                min-width: auto;
+            }
+        
+    </style>
+</head>
+<body>
+    <div class="calculator-container">
+        <h1>🔢 Kalkulator Hampiran Selisih Numerik</h1>
+        <p class="subtitle">Hitung turunan numerik menggunakan metode selisih mundur, maju, dan pusat</p>
+        
+        <div class="info-box">
+            <strong>Rumus Selisih Numerik:</strong><br>
+            <strong>Selisih Mundur:</strong> f'(x) ≈ [f(x) - f(x-h)] / h<br>
+            <strong>Selisih Maju:</strong> f'(x) ≈ [f(x+h) - f(x)] / h<br>
+            <strong>Selisih Pusat:</strong> f'(x) ≈ [f(x+h) - f(x-h)] / 2h
+        </div>
+
+        <div class="input-group">
+            <label for="function">Fungsi f(x) (gunakan 'x' sebagai variabel):</label>
+            <input type="text" id="function" placeholder="Contoh: x^2 + 3*x + 2 atau Math.sin(x)" value="x^2">
+        </div>
+
+        <div class="input-group">
+            <label for="point">Titik x:</label>
+            <input type="number" id="point" step="any" placeholder="Titik evaluasi" value="2">
+        </div>
+
+        <div class="input-group">
+            <label for="stepSize">Ukuran langkah (h):</label>
+            <input type="number" id="stepSize" step="any" placeholder="Ukuran langkah" value="0.1">
+        </div>
+
+        <div class="input-group">
+            <label>Metode:</label>
+            <div class="method-selector">
+                <div class="method-option">
+                    <input type="radio" id="backward" name="method" value="backward" checked>
+                    <label for="backward">Selisih Mundur</label>
+                </div>
+                <div class="method-option">
+                    <input type="radio" id="forward" name="method" value="forward">
+                    <label for="forward">Selisih Maju</label>
+                </div>
+                <div class="method-option">
+                    <input type="radio" id="central" name="method" value="central">
+                    <label for="central">Selisih Pusat</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-group" id="orderGroup">
+            <label>Orde (hanya untuk Selisih Mundur):</label>
+            <div class="method-selector">
+                <div class="method-option">
+                    <input type="radio" id="order1" name="order" value="1" checked>
+                    <label for="order1">Orde 1</label>
+                </div>
+                <div class="method-option">
+                    <input type="radio" id="order2" name="order" value="2">
+                    <label for="order2">Orde 2</label>
+                </div>
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculate()">Hitung Hampiran</button>
+
+        <div id="result" class="result">
+            <h3>Hasil Perhitungan</h3>
+            <div id="resultValue" class="result-value"></div>
+            <div id="calculation" class="formula"></div>
+            <div id="exactDerivative" class="formula"></div>
+        </div>
+
+        <div class="example">
+            <strong>Contoh Penggunaan:</strong><br>
+            • Fungsi: x^2 + 3*x + 2<br>
+            • Titik: x = 2<br>
+            • Langkah: h = 0.1<br>
+            • Selisih Mundur: f'(2) ≈ 7.1<br>
+            • Selisih Maju: f'(2) ≈ 6.9<br>
+            • Selisih Pusat: f'(2) ≈ 7.0<br>
+            • Nilai eksak: f'(2) = 7
+        </div>
+    </div>
+
+    <script>
+        function evaluateFunction(func, x) {
+            try {
+                // Ganti simbol ^ dengan Math.pow untuk perpangkatan
+                let expression = func.replace(/\^/g, '**');
+                
+                // Ganti fungsi matematika umum
+                expression = expression.replace(/sin/g, 'Math.sin');
+                expression = expression.replace(/cos/g, 'Math.cos');
+                expression = expression.replace(/tan/g, 'Math.tan');
+                expression = expression.replace(/log/g, 'Math.log');
+                expression = expression.replace(/exp/g, 'Math.exp');
+                expression = expression.replace(/sqrt/g, 'Math.sqrt');
+                expression = expression.replace(/abs/g, 'Math.abs');
+                
+                // Evaluasi dengan substitusi x
+                return eval(expression.replace(/x/g, x));
+            } catch (error) {
+                throw new Error('Fungsi tidak valid');
+            }
+        }
+
+        function calculate() {
+            try {
+                const functionStr = document.getElementById('function').value;
+                const x = parseFloat(document.getElementById('point').value);
+                const h = parseFloat(document.getElementById('stepSize').value);
+                const method = document.querySelector('input[name="method"]:checked').value;
+                const order = document.querySelector('input[name="order"]:checked').value;
+
+                if (!functionStr || isNaN(x) || isNaN(h)) {
+                    alert('Mohon isi semua field dengan benar');
+                    return;
+                }
+
+                if (h === 0) {
+                    alert('Ukuran langkah tidak boleh nol');
+                    return;
+                }
+
+                let result, calculation;
+
+                if (method === 'backward') {
+                    if (order === '1') {
+                        // Selisih Mundur Orde 1: f'(x) ≈ [f(x) - f(x-h)] / h
+                        const fx = evaluateFunction(functionStr, x);
+                        const fxMinusH = evaluateFunction(functionStr, x - h);
+                        
+                        result = (fx - fxMinusH) / h;
+                        calculation = `f'(${x}) ≈ [f(${x}) - f(${x - h})] / ${h}
+                                     = [${fx.toFixed(6)} - ${fxMinusH.toFixed(6)}] / ${h}
+                                     = ${(fx - fxMinusH).toFixed(6)} / ${h}
+                                     = ${result.toFixed(6)}`;
+                    } else {
+                        // Selisih Mundur Orde 2: f'(x) ≈ [3f(x) - 4f(x-h) + f(x-2h)] / 2h
+                        const fx = evaluateFunction(functionStr, x);
+                        const fxMinusH = evaluateFunction(functionStr, x - h);
+                        const fxMinus2H = evaluateFunction(functionStr, x - 2*h);
+                        
+                        result = (3*fx - 4*fxMinusH + fxMinus2H) / (2*h);
+                        calculation = `f'(${x}) ≈ [3f(${x}) - 4f(${x - h}) + f(${x - 2*h})] / (2 × ${h})
+                                     = [3(${fx.toFixed(6)}) - 4(${fxMinusH.toFixed(6)}) + ${fxMinus2H.toFixed(6)}] / ${2*h}
+                                     = [${(3*fx).toFixed(6)} - ${(4*fxMinusH).toFixed(6)} + ${fxMinus2H.toFixed(6)}] / ${2*h}
+                                     = ${(3*fx - 4*fxMinusH + fxMinus2H).toFixed(6)} / ${2*h}
+                                     = ${result.toFixed(6)}`;
+                    }
+                } else if (method === 'forward') {
+                    // Selisih Maju: f'(x) ≈ [f(x+h) - f(x)] / h
+                    const fx = evaluateFunction(functionStr, x);
+                    const fxPlusH = evaluateFunction(functionStr, x + h);
+                    
+                    result = (fxPlusH - fx) / h;
+                    calculation = `f'(${x}) ≈ [f(${x + h}) - f(${x})] / ${h}
+                                 = [${fxPlusH.toFixed(6)} - ${fx.toFixed(6)}] / ${h}
+                                 = ${(fxPlusH - fx).toFixed(6)} / ${h}
+                                 = ${result.toFixed(6)}`;
+                } else if (method === 'central') {
+                    // Selisih Pusat: f'(x) ≈ [f(x+h) - f(x-h)] / 2h
+                    const fxPlusH = evaluateFunction(functionStr, x + h);
+                    const fxMinusH = evaluateFunction(functionStr, x - h);
+                    
+                    result = (fxPlusH - fxMinusH) / (2*h);
+                    calculation = `f'(${x}) ≈ [f(${x + h}) - f(${x - h})] / (2 × ${h})
+                                 = [${fxPlusH.toFixed(6)} - ${fxMinusH.toFixed(6)}] / ${2*h}
+                                 = ${(fxPlusH - fxMinusH).toFixed(6)} / ${2*h}
+                                 = ${result.toFixed(6)}`;
+                }
+
+                // Tampilkan hasil
+                document.getElementById('resultValue').textContent = `f'(${x}) ≈ ${result.toFixed(8)}`;
+                document.getElementById('calculation').innerHTML = calculation.replace(/\n/g, '<br>');
+                
+                // Coba hitung turunan eksak untuk beberapa fungsi sederhana
+                let exactInfo = '';
+                try {
+                    exactInfo = getExactDerivative(functionStr, x);
+                } catch (e) {
+                    exactInfo = 'Turunan eksak tidak dapat dihitung secara otomatis';
+                }
+                
+                document.getElementById('exactDerivative').innerHTML = exactInfo;
+                document.getElementById('result').style.display = 'block';
+                
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function getExactDerivative(funcStr, x) {
+            // Fungsi sederhana untuk menghitung turunan eksak beberapa fungsi umum
+            let derivative = '';
+            let exactValue = '';
+            
+            if (funcStr.includes('x^2') || funcStr.includes('x**2')) {
+                if (funcStr === 'x^2' || funcStr === 'x**2') {
+                    derivative = "f'(x) = 2x";
+                    exactValue = 2 * x;
+                }
+            } else if (funcStr.includes('x^3') || funcStr.includes('x**3')) {
+                if (funcStr === 'x^3' || funcStr === 'x**3') {
+                    derivative = "f'(x) = 3x²";
+                    exactValue = 3 * x * x;
+                }
+            } else if (funcStr.includes('sin(x)') || funcStr.includes('Math.sin(x)')) {
+                if (funcStr === 'sin(x)' || funcStr === 'Math.sin(x)') {
+                    derivative = "f'(x) = cos(x)";
+                    exactValue = Math.cos(x);
+                }
+            } else if (funcStr.includes('cos(x)') || funcStr.includes('Math.cos(x)')) {
+                if (funcStr === 'cos(x)' || funcStr === 'Math.cos(x)') {
+                    derivative = "f'(x) = -sin(x)";
+                    exactValue = -Math.sin(x);
+                }
+            }
+            
+            if (derivative && exactValue !== '') {
+                return `<strong>Turunan Eksak:</strong><br>${derivative}<br>Nilai eksak: f'(${x}) = ${exactValue.toFixed(8)}`;
+            }
+            
+            return '<strong>Info:</strong> Turunan eksak tidak tersedia untuk fungsi ini';
+        }
+
+        // Event listeners
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculate();
+            }
+        });
+
+        // Show/hide order options based on method selection
+        document.querySelectorAll('input[name="method"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const orderGroup = document.getElementById('orderGroup');
+                if (this.value === 'backward') {
+                    orderGroup.style.display = 'block';
+                } else {
+                    orderGroup.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
